@@ -1,66 +1,23 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import NextImage from "next/image";
 import { motion } from "framer-motion";
 import { NavButton } from "@/components/NavButton";
 import { WorldCard } from "@/components/WorldPickerModal";
-import type { WorldEntry } from "@/lib/worldStore";
+import { SAMPLE_WORLDS } from "@/lib/sampleWorlds";
 
 export default function WorldsPage() {
   const router = useRouter();
-  const [worlds, setWorlds] = useState<WorldEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/worlds")
-      .then((res) => res.json())
-      .then((data) => {
-        const fetched: WorldEntry[] = data.worlds ?? [];
-        if (fetched.length === 0) {
-          router.replace("/generate");
-          return;
-        }
-        setWorlds(fetched);
-        setLoading(false);
-      })
-      .catch(() => {
-        router.replace("/generate");
-      });
-  }, [router]);
 
   const handleSelectWorld = useCallback(
-    (world: WorldEntry) => {
-      router.push(`/generate?pano=${encodeURIComponent(world.panoPath)}`);
+    (panoPath: string) => {
+      router.push(`/generate?pano=${encodeURIComponent(panoPath)}`);
     },
     [router]
   );
-
-  const handleDelete = useCallback(
-    (world: WorldEntry) => {
-      setWorlds((prev) => {
-        const next = prev.filter((w) => w.id !== world.id);
-        if (next.length === 0) setTimeout(() => router.push("/create"), 300);
-        return next;
-      });
-      fetch("/api/worlds", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ panoPath: world.panoPath }),
-      }).catch(() => {
-        setWorlds((prev) =>
-          [world, ...prev].sort((a, b) => b.createdAt - a.createdAt)
-        );
-      });
-    },
-    [router]
-  );
-
-  if (loading) {
-    return <div className="min-h-screen bg-[#050507]" />;
-  }
 
   return (
     <div className="min-h-screen bg-[#050507] text-white">
@@ -141,7 +98,7 @@ export default function WorldsPage() {
               className="text-xs text-white/30"
               style={{ fontFamily: "var(--font-geist-mono)" }}
             >
-              {worlds.length} saved world{worlds.length !== 1 ? "s" : ""} —
+              {SAMPLE_WORLDS.length} sample world{SAMPLE_WORLDS.length !== 1 ? "s" : ""} —
               click any to enter
             </p>
           </div>
@@ -150,7 +107,7 @@ export default function WorldsPage() {
         {/* World grid */}
         <div className="pb-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {worlds.map((world, i) => (
+            {SAMPLE_WORLDS.map((world, i) => (
               <motion.div
                 key={world.id}
                 initial={{ opacity: 0, y: 16 }}
@@ -163,8 +120,7 @@ export default function WorldsPage() {
               >
                 <WorldCard
                   world={world}
-                  onClick={() => handleSelectWorld(world)}
-                  onDelete={() => handleDelete(world)}
+                  onClick={() => handleSelectWorld(world.panoPath)}
                 />
               </motion.div>
             ))}

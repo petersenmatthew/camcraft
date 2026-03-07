@@ -63,7 +63,7 @@ export function relativeTime(ts: number): string {
 }
 
 // ── World card ───────────────────────────────────────────────
-export function WorldCard({ world, onClick, onDelete }: { world: WorldEntry; onClick: () => void; onDelete: () => void }) {
+export function WorldCard({ world, onClick, onDelete }: { world: WorldEntry; onClick: () => void; onDelete?: () => void }) {
   const { parameters, panoPath, createdAt } = world;
 
   const primaryLabel =
@@ -114,7 +114,7 @@ export function WorldCard({ world, onClick, onDelete }: { world: WorldEntry; onC
       </div>
 
       {/* Delete button — top-left, hover only */}
-      <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+      {onDelete && <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
@@ -125,7 +125,7 @@ export function WorldCard({ world, onClick, onDelete }: { world: WorldEntry; onC
             <path d="M1 1L7 7M7 1L1 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
         </button>
-      </div>
+      </div>}
 
       {/* Time chip overlay */}
       <div className="absolute top-2.5 right-2.5 z-20">
