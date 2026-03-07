@@ -103,38 +103,23 @@ export default function PanoPage() {
     a.download = `focus_${Date.now()}.jpg`;
     a.click();
 
-    fetch("/api/save-photo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        image: base64.data,
-        mimeType: base64.mimeType,
-        scene: {},
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.savedPath) {
-          const specs = CAMERA_SPECS[activeCamera];
-          const entry: GalleryEntry = {
-            id: `gallery_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-            imagePath: data.savedPath,
-            panoPath: null,
-            capturedAt: Date.now(),
-            scene: {},
-            camera: {
-              body: specs.body,
-              lens: specs.lens,
-              focalLength: specs.focalLength,
-              iso: specs.iso,
-              sensor: specs.sensor,
-              resolution: specs.resolution,
-            },
-          };
-          addGalleryEntry(entry);
-        }
-      })
-      .catch((err) => console.error("Failed to save photo:", err));
+    const specs = CAMERA_SPECS[activeCamera];
+    const entry: GalleryEntry = {
+      id: `gallery_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      imagePath: `data:${base64.mimeType};base64,${base64.data}`,
+      panoPath: null,
+      capturedAt: Date.now(),
+      scene: {},
+      camera: {
+        body: specs.body,
+        lens: specs.lens,
+        focalLength: specs.focalLength,
+        iso: specs.iso,
+        sensor: specs.sensor,
+        resolution: specs.resolution,
+      },
+    };
+    addGalleryEntry(entry);
 
     setFocusImage(null);
     focusBase64Ref.current = null;
