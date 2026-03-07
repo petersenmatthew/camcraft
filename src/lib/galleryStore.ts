@@ -26,30 +26,22 @@ export type GalleryEntry = {
   };
 };
 
-const STORAGE_KEY = "camcraft_gallery";
+// In-memory store — persists across client-side navigations within a session,
+// clears on page refresh. Avoids localStorage quota issues with large base64 images.
+let _entries: GalleryEntry[] = [];
 
 export function getGalleryEntries(): GalleryEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as GalleryEntry[];
-  } catch {
-    return [];
-  }
+  return _entries;
 }
 
 export function addGalleryEntry(entry: GalleryEntry): void {
-  const entries = getGalleryEntries();
-  entries.unshift(entry);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  _entries = [entry, ..._entries];
 }
 
 export function removeGalleryEntry(id: string): void {
-  const entries = getGalleryEntries().filter((e) => e.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  _entries = _entries.filter((e) => e.id !== id);
 }
 
 export function clearGallery(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  _entries = [];
 }

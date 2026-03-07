@@ -1,30 +1,13 @@
-const BADGE_KEY = "camcraft_gallery_unseen";
+let _unseen = 0;
 
 export function getUnseenCount(): number {
-  if (typeof window === "undefined") return 0;
-  try {
-    const raw = localStorage.getItem(BADGE_KEY);
-    return raw ? parseInt(raw, 10) || 0 : 0;
-  } catch {
-    return 0;
-  }
+  return _unseen;
 }
 
 export function incrementUnseen(): void {
-  if (typeof window === "undefined") return;
-  try {
-    const count = getUnseenCount();
-    localStorage.setItem(BADGE_KEY, String(count + 1));
-  } catch {
-    // ignore
-  }
+  _unseen += 1;
 }
 
 export function resetUnseen(): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.removeItem(BADGE_KEY);
-  } catch {
-    // ignore
-  }
+  _unseen = 0;
 }
