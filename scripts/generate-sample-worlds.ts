@@ -86,11 +86,11 @@ async function generate(params: Record<string, string>): Promise<Buffer> {
 
 const WORLDS = [
   {
-    filename: "tokyo-night.jpg",
+    filename: "new-york-1980s.jpg",
     params: {
-      location: "Tokyo, Japan",
-      timeOfDay: "night",
-      decade: "Today",
+      location: "New York City, USA",
+      timeOfDay: "afternoon",
+      decade: "1980s",
       placeType: "street",
       weather: "clear",
       crowd: "busy",
