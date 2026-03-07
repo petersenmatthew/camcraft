@@ -115,18 +115,7 @@ export default function CreatePage() {
     const audio = new Audio("/confirm_button.mp3");
     audio.play().catch(() => {});
 
-    try {
-      const res = await fetch("/api/worlds");
-      const data = await res.json();
-      const fetchedWorlds = data.worlds ?? [];
-      if (fetchedWorlds.length === 0) {
-        router.push("/generate");
-      } else {
-        router.push("/worlds");
-      }
-    } catch {
-      router.push("/generate");
-    }
+    router.push("/worlds");
   }, [router]);
 
   return (

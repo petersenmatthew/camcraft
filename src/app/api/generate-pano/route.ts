@@ -48,7 +48,7 @@ function buildPrompt(params: Record<string, string>): string {
   // For older decades, append a final format reminder (recency bias helps)
   const decadeNum = parseInt(params.decade);
   if (isSet(params.decade) && params.decade !== "Today" && !isNaN(decadeNum) && decadeNum < 2000) {
-    prompt += "\n\nRemember: equirectangular projection only. No fisheye, no barrel distortion, no mirrored reflections at top/bottom. The format must be indistinguishable from Google Street View.";
+    prompt += "\n\nRemember: equirectangular projection only. No fisheye, no barrel distortion, no mirrored reflections at top/bottom. No UI elements, no watermarks, no interface overlays — raw photograph only.";
   }
 
   return prompt;
