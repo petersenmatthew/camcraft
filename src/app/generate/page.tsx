@@ -12,12 +12,9 @@ import HandOverlay from "@/app/pano/HandOverlay";
 import CameraViewfinderFrame, { VIEWFINDER_DIMENSIONS, MiniCameraFrame } from "@/components/CameraViewfinderFrame";
 
 import GestureTutorial from "@/components/GestureTutorial";
-import { addGalleryEntry } from "@/lib/galleryStore";
-import type { GalleryEntry } from "@/lib/galleryStore";
 import { getUnseenCount, incrementUnseen } from "@/lib/galleryBadgeStore";
 import { getActiveCamera, CAMERA_SPECS } from "@/lib/cameraStore";
 import type { CameraId } from "@/lib/cameraStore";
-import type { WorldEntry } from "@/lib/worldStore";
 
 const PanoViewer = dynamic(() => import("@/app/pano/PanoViewer"), {
   ssr: false,
@@ -526,55 +523,6 @@ function GeneratePageContent() {
     a.download = `focus_${Date.now()}.jpg`;
     a.click();
 
-    // Save to server + gallery store
-    const sceneData = {
-      location: resolvedParams?.location,
-      timeOfDay: resolvedParams?.timeOfDay,
-      decade: resolvedParams?.decade,
-      placeType: resolvedParams?.placeType,
-      weather: resolvedParams?.weather,
-      crowd: resolvedParams?.crowd,
-    };
-
-    fetch("/api/save-photo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        image: base64.data,
-        mimeType: base64.mimeType,
-        scene: sceneData,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.savedPath) {
-          const specs = CAMERA_SPECS[activeCamera];
-          const entry: GalleryEntry = {
-            id: `gallery_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-            imagePath: data.savedPath,
-            panoPath: null,
-            capturedAt: Date.now(),
-            scene: {
-              location: sceneData.location,
-              timeOfDay: sceneData.timeOfDay,
-              era: sceneData.decade,
-              setting: sceneData.placeType,
-              weather: sceneData.weather,
-              crowd: sceneData.crowd,
-            },
-            camera: {
-              body: specs.body,
-              lens: specs.lens,
-              focalLength: specs.focalLength,
-              iso: specs.iso,
-              sensor: specs.sensor,
-              resolution: specs.resolution,
-            },
-          };
-          addGalleryEntry(entry);
-        }
-      })
-      .catch((err) => console.error("Failed to save photo:", err));
 
     // Clear the focus image after capturing
     setFocusImage(null);

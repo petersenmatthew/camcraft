@@ -1,15 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import type { WorldEntry } from "@/lib/worldStore";
 
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 30);
-}
 
 const RANDOM_CITIES = [
   "Tokyo, Japan", "Paris, France", "New York City, USA", "Istanbul, Turkey",
@@ -140,52 +130,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Build a descriptive filename from resolved params
-    const slugParts: string[] = [];
-    if (isSet(resolved.location)) slugParts.push(slugify(resolved.location));
-    if (isSet(resolved.timeOfDay)) slugParts.push(slugify(resolved.timeOfDay));
-    if (isSet(resolved.decade)) slugParts.push(slugify(resolved.decade));
-    if (isSet(resolved.placeType)) slugParts.push(slugify(resolved.placeType));
-    if (isSet(resolved.weather)) slugParts.push(slugify(resolved.weather));
-    const slug = slugParts.length > 0 ? slugParts.join("-") : "scene";
-
-    const ext = imagePart.inlineData.mimeType === "image/png" ? "png" : "jpg";
-    const filename = `${slug}-${Date.now()}.${ext}`;
-    const dir = path.join(process.cwd(), "public", "generated", "panos");
-    await mkdir(dir, { recursive: true });
-    await writeFile(
-      path.join(dir, filename),
-      Buffer.from(imagePart.inlineData.data, "base64")
-    );
-    console.log(`Saved panorama: public/generated/panos/${filename}`);
-
-    // Write companion JSON sidecar for world library
-    const worldEntry: WorldEntry = {
-      id: `world_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      panoPath: `/generated/panos/${filename}`,
-      parameters: {
-        location: resolved.location ?? "",
-        timeOfDay: resolved.timeOfDay ?? "",
-        decade: resolved.decade ?? "",
-        placeType: resolved.placeType ?? "",
-        weather: resolved.weather ?? "",
-        crowd: resolved.crowd ?? "",
-      },
-      prompt,
-      createdAt: Date.now(),
-    };
-    const jsonFilename = filename.replace(/\.(jpg|png)$/, ".json");
-    await writeFile(
-      path.join(dir, jsonFilename),
-      JSON.stringify(worldEntry, null, 2)
-    );
-
     return NextResponse.json({
       image: imagePart.inlineData.data,
       mimeType: imagePart.inlineData.mimeType,
       prompt,
       parameters: resolved,
-      savedPath: `/generated/panos/${filename}`,
     });
   } catch (e) {
     console.error("Gemini request failed:", e);
