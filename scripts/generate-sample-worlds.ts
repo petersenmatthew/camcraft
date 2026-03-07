@@ -86,50 +86,6 @@ async function generate(params: Record<string, string>): Promise<Buffer> {
 
 const WORLDS = [
   {
-    filename: "tokyo-night.jpg",
-    params: {
-      location: "Tokyo, Japan",
-      timeOfDay: "night",
-      decade: "Today",
-      placeType: "street",
-      weather: "clear",
-      crowd: "busy",
-    },
-  },
-  {
-    filename: "paris-golden-hour.jpg",
-    params: {
-      location: "Paris, France",
-      timeOfDay: "golden hour",
-      decade: "Today",
-      placeType: "street",
-      weather: "clear",
-      crowd: "moderate",
-    },
-  },
-  {
-    filename: "havana-1970s.jpg",
-    params: {
-      location: "Havana, Cuba",
-      timeOfDay: "noon",
-      decade: "1970s",
-      placeType: "street",
-      weather: "clear",
-      crowd: "few people",
-    },
-  },
-  {
-    filename: "marrakech-market.jpg",
-    params: {
-      location: "Marrakech, Morocco",
-      timeOfDay: "morning",
-      decade: "Today",
-      placeType: "market",
-      weather: "hazy",
-      crowd: "busy",
-    },
-  },
-  {
     filename: "reykjavik-snow.jpg",
     params: {
       location: "Reykjavik, Iceland",
