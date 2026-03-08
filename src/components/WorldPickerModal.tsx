@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import type { WorldEntry } from "@/lib/worldStore";
@@ -64,7 +65,7 @@ export function relativeTime(ts: number): string {
 
 // ── World card ───────────────────────────────────────────────
 export function WorldCard({ world, onClick, onDelete }: { world: WorldEntry; onClick: () => void; onDelete?: () => void }) {
-  const { parameters, panoPath, createdAt } = world;
+  const { parameters, panoPath, thumbnailPath, createdAt } = world;
 
   const primaryLabel =
     parameters.location && parameters.location !== "Default"
@@ -88,12 +89,13 @@ export function WorldCard({ world, onClick, onDelete }: { world: WorldEntry; onC
       whileTap={{ scale: 0.98 }}
     >
       {/* Background Image */}
-      <img
-        src={panoPath}
+      <Image
+        src={thumbnailPath ?? panoPath}
         alt={primaryLabel}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] z-0"
+        fill
+        className="absolute inset-0 object-cover transition-transform duration-500 group-hover:scale-[1.03] z-0"
         style={{ objectPosition: "center 30%" }}
-        loading="lazy"
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
       />
 
       {/* Gradient & Blur Bottom Overlay for Title Area */}

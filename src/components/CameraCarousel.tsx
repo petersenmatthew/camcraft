@@ -660,11 +660,6 @@ const CarouselScene = ({
   );
 };
 
-// Preload all models
-CAMERAS.forEach((camera) => {
-  useGLTF.preload(camera.modelPath);
-});
-
 // Specs Panel Component - larger for exploded view
 const SpecsPanel = ({ cameraId, visible }: { cameraId: string; visible: boolean }) => {
   const specs = CAMERA_SPECS[cameraId];

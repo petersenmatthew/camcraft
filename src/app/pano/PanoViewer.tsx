@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-const PANO_PATH = "/generated/pano_1770515013453.jpg";
+const PANO_PATH = "/sample-worlds/paris-golden-hour.jpg";
 
 export type GestureDeltaRef = React.MutableRefObject<{
   deltaAzimuth: number;

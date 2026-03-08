@@ -253,6 +253,9 @@ function ShutterButton({ onNavigate }: { onNavigate: () => void }) {
   return (
     <button
       onClick={handleClick}
+      onMouseEnter={preloadCameraModels}
+      onFocus={preloadCameraModels}
+      onTouchStart={preloadCameraModels}
       className="group relative flex items-center justify-center"
       onMouseDown={() => setPressed(true)}
       onMouseUp={() => setPressed(false)}
@@ -460,8 +463,6 @@ export default function LandingPage() {
 
   useEffect(() => {
     setMounted(true);
-    // Start preloading 3D models immediately so they're ready when user navigates
-    preloadCameraModels();
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);

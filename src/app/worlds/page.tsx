@@ -59,27 +59,12 @@ export default function WorldsPage() {
             World Library
           </h1>
 
-          <button
-            onClick={() => router.push("/generate")}
-            className="group flex items-center gap-2 rounded-lg border border-[#B0FBCD]/20 bg-[#B0FBCD]/[0.06] px-4 py-2 text-xs tracking-[0.2em] uppercase text-[#B0FBCD]/70 transition-all duration-300 hover:border-[#B0FBCD]/40 hover:bg-[#B0FBCD]/[0.12] hover:text-[#B0FBCD]"
+          <span
+            className="rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-[10px] tracking-[0.25em] uppercase text-white/35"
             style={{ fontFamily: "var(--font-geist-mono)" }}
           >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              className="transition-transform duration-300 group-hover:rotate-90"
-            >
-              <path
-                d="M6 1V11M1 6H11"
-                stroke="currentColor"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-              />
-            </svg>
-            Generate New
-          </button>
+            Sample Worlds Only
+          </span>
         </div>
       </header>
 

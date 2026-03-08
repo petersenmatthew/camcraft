@@ -1,6 +1,7 @@
 export type WorldEntry = {
   id: string;
   panoPath: string;
+  thumbnailPath?: string;
   parameters: {
     location: string;
     timeOfDay: string;

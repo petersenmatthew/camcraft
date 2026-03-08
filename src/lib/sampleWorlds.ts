@@ -1,11 +1,12 @@
 import type { WorldEntry } from "./worldStore";
 
-// Static sample worlds — images live in public/sample-worlds/
-// Replace the panoPath filenames with your actual equirectangular JPEGs.
+// Static sample worlds — full panos live in public/sample-worlds/
+// and lightweight card thumbnails live in public/sample-worlds/thumbs/.
 export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_tokyo_night",
     panoPath: "/sample-worlds/tokyo-night.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/tokyo-night.jpg",
     parameters: {
       location: "Tokyo, Japan",
       timeOfDay: "night",
@@ -20,6 +21,7 @@ export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_paris_golden",
     panoPath: "/sample-worlds/paris-golden-hour.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/paris-golden-hour.jpg",
     parameters: {
       location: "Paris, France",
       timeOfDay: "golden hour",
@@ -34,6 +36,7 @@ export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_havana_1970s",
     panoPath: "/sample-worlds/havana-1970s.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/havana-1970s.jpg",
     parameters: {
       location: "Havana, Cuba",
       timeOfDay: "noon",
@@ -48,6 +51,7 @@ export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_marrakech_market",
     panoPath: "/sample-worlds/marrakech-market.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/marrakech-market.jpg",
     parameters: {
       location: "Marrakech, Morocco",
       timeOfDay: "morning",
@@ -62,6 +66,7 @@ export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_reykjavik_snow",
     panoPath: "/sample-worlds/reykjavik-snow.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/reykjavik-snow.jpg",
     parameters: {
       location: "Reykjavik, Iceland",
       timeOfDay: "dawn",
@@ -76,6 +81,7 @@ export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_rome_1960s",
     panoPath: "/sample-worlds/rome-1960s.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/rome-1960s.jpg",
     parameters: {
       location: "Rome, Italy",
       timeOfDay: "afternoon",
@@ -90,6 +96,7 @@ export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_new_york_1980s",
     panoPath: "/sample-worlds/new-york-1980s.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/new-york-1980s.jpg",
     parameters: {
       location: "New York City, USA",
       timeOfDay: "afternoon",
@@ -104,6 +111,7 @@ export const SAMPLE_WORLDS: WorldEntry[] = [
   {
     id: "sample_berlin_1990s",
     panoPath: "/sample-worlds/berlin-1990s.jpg",
+    thumbnailPath: "/sample-worlds/thumbs/berlin-1990s.jpg",
     parameters: {
       location: "Berlin, Germany",
       timeOfDay: "afternoon",

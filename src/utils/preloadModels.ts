@@ -14,7 +14,7 @@ export function preloadCameraModels() {
   if (preloaded || typeof window === "undefined") return;
   preloaded = true;
 
-  // Use native fetch to preload models into browser cache
+  // Hint to the browser that these models are likely needed next.
   MODEL_PATHS.forEach((path) => {
     const link = document.createElement("link");
     link.rel = "prefetch";
@@ -22,13 +22,6 @@ export function preloadCameraModels() {
     link.as = "fetch";
     link.crossOrigin = "anonymous";
     document.head.appendChild(link);
-  });
-
-  // Also start loading with fetch to warm the cache
-  MODEL_PATHS.forEach((path) => {
-    fetch(path, { mode: "cors" })
-      .then((res) => res.blob())
-      .catch(() => {}); // Silently ignore errors
   });
 }
 

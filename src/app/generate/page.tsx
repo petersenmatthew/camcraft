@@ -418,6 +418,7 @@ const FOCUS_SOUND = "/focus.mp3";
 // ── Main page ─────────────────────────────────────────────────
 function GeneratePageContent() {
   const searchParams = useSearchParams();
+  const selectedPano = searchParams.get("pano");
 
   // Active camera state
   const [activeCamera, setActiveCameraState] = useState<CameraId>("sony-a7iv");
@@ -440,7 +441,7 @@ function GeneratePageContent() {
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [panoUrl, setPanoUrl] = useState<string | null>(null);
+  const [panoUrl, setPanoUrl] = useState<string | null>(selectedPano);
   const [resolvedParams, setResolvedParams] = useState<Record<string, string> | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialDismissed, setTutorialDismissed] = useState(false);
@@ -448,14 +449,12 @@ function GeneratePageContent() {
 
   // Load existing world from ?pano= search param
   useEffect(() => {
-    const pano = searchParams.get("pano");
-    if (pano) {
-      setPanoUrl(pano);
+    if (selectedPano) {
+      setPanoUrl(selectedPano);
       setShowViewer(true);
       setTutorialDismissed(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedPano]);
 
   // Camera overlay state (same as /pano)
   const gestureDeltaRef = useRef<{ deltaAzimuth: number; deltaPolar: number }>({
@@ -782,6 +781,83 @@ function GeneratePageContent() {
           <SceneDetailsPanel resolvedParams={resolvedParams} />
         )}
 
+      </div>
+    );
+  }
+
+  if (!selectedPano && !panoUrl) {
+    return (
+      <div className="min-h-screen bg-[#050507] text-white">
+        <div
+          className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: "repeat",
+          }}
+        />
+
+        <header className="relative z-10 border-b border-white/[0.06] bg-[#050507]/80 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-4 sm:px-10">
+            <div className="flex items-center gap-4">
+              <Link href="/" aria-label="Home" className="relative shrink-0">
+                <div
+                  className="absolute inset-0 blur-lg opacity-25 rounded-full"
+                  style={{ background: "rgba(176,251,205,0.4)", transform: "scale(1.6)" }}
+                />
+                <NextImage
+                  src="/logo.png"
+                  alt="CamCraft"
+                  width={28}
+                  height={28}
+                  className="relative h-7 w-7 object-contain drop-shadow-[0_0_10px_rgba(176,251,205,0.15)]"
+                />
+              </Link>
+              <div className="h-4 w-px bg-white/[0.08]" />
+              <NavButton href="/worlds" icon="back" label="Back" variant="header" />
+            </div>
+            <h1
+              className="text-sm tracking-[0.25em] uppercase text-white/70"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Sample Worlds
+            </h1>
+            <NavButton href="/gallery" icon="gallery" label="Gallery" variant="header" />
+          </div>
+        </header>
+
+        <main className="relative z-10 flex min-h-[calc(100vh-73px)] items-center justify-center px-6 py-12 sm:px-10">
+          <div className="w-full max-w-2xl rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-8 text-center shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-12">
+            <div
+              className="mx-auto mb-6 inline-flex rounded-full border border-[#B0FBCD]/20 bg-[#B0FBCD]/10 px-4 py-2 text-[10px] tracking-[0.28em] uppercase text-[#B0FBCD]/75"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Generation Disabled
+            </div>
+            <h2 className="text-3xl font-light tracking-tight text-white/90 sm:text-4xl">
+              Browse the curated sample worlds instead
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/45 sm:text-base">
+              Custom world generation is turned off. You can still enter every sample world, explore the panorama,
+              and capture photos from the viewer.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/worlds"
+                className="inline-flex items-center justify-center rounded-lg border border-[#B0FBCD]/25 bg-[#B0FBCD]/10 px-6 py-3 text-sm tracking-[0.18em] uppercase text-[#B0FBCD]/85 transition-all duration-300 hover:border-[#B0FBCD]/40 hover:bg-[#B0FBCD]/15 hover:text-[#B0FBCD]"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                Open Sample Worlds
+              </Link>
+              <Link
+                href="/gallery"
+                className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] px-6 py-3 text-sm tracking-[0.18em] uppercase text-white/55 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white/75"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                Open Gallery
+              </Link>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
