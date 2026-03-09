@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { NavButton } from "@/components/NavButton";
 import PhotoFlyAnimation from "@/components/PhotoFlyAnimation";
+import FocusRateLimitModal from "@/components/FocusRateLimitModal";
 import HandOverlay from "./HandOverlay";
 import CameraViewfinderFrame, { VIEWFINDER_DIMENSIONS, MiniCameraFrame } from "@/components/CameraViewfinderFrame";
 
@@ -51,6 +52,11 @@ export default function PanoPage() {
   const [cameraOverlayActive, setCameraOverlayActive] = useState(false);
   const [focusLoading, setFocusLoading] = useState(false);
   const [focusImage, setFocusImage] = useState<string | null>(null);
+  const [focusRateLimitModal, setFocusRateLimitModal] = useState<{
+    open: boolean;
+    retryAfterSeconds: number | null;
+    reason: string | null;
+  }>({ open: false, retryAfterSeconds: null, reason: null });
   const [badgeCount, setBadgeCount] = useState(0);
   const [badgePulse, setBadgePulse] = useState(false);
   const [flyAnimation, setFlyAnimation] = useState<{
@@ -58,6 +64,7 @@ export default function PanoPage() {
     fromRect: DOMRect;
   } | null>(null);
   const focusBase64Ref = useRef<{ data: string; mimeType: string } | null>(null);
+  const focusCooldownUntilRef = useRef<number | null>(null);
 
   const focusImageRef = useRef<string | null>(null);
   focusImageRef.current = focusImage;
@@ -75,6 +82,22 @@ export default function PanoPage() {
     setBadgeCount(getUnseenCount());
     setBadgePulse(true);
     setTimeout(() => setBadgePulse(false), 600);
+  }, []);
+
+  const openFocusRateLimitModal = useCallback(
+    (retryAfterSeconds: number, reason: string | null) => {
+      focusCooldownUntilRef.current = Date.now() + retryAfterSeconds * 1000;
+      setFocusRateLimitModal({
+        open: true,
+        retryAfterSeconds,
+        reason,
+      });
+    },
+    []
+  );
+
+  const closeFocusRateLimitModal = useCallback(() => {
+    setFocusRateLimitModal((prev) => ({ ...prev, open: false }));
   }, []);
 
   const onPictureFrame = useCallback(() => {
@@ -138,6 +161,19 @@ export default function PanoPage() {
   const onFocus = useCallback(() => {
     if (focusLoadingRef.current) return; // don't re-trigger while loading
 
+    const cooldownUntil = focusCooldownUntilRef.current;
+    if (cooldownUntil && cooldownUntil > Date.now()) {
+      openFocusRateLimitModal(
+        Math.max(1, Math.ceil((cooldownUntil - Date.now()) / 1000)),
+        focusRateLimitModal.reason ?? "cooldown"
+      );
+      return;
+    }
+
+    if (cooldownUntil && cooldownUntil <= Date.now()) {
+      focusCooldownUntilRef.current = null;
+    }
+
     // Play focus sound
     try {
       if (!focusAudioRef.current) {
@@ -184,8 +220,14 @@ export default function PanoPage() {
         });
 
         if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          if (res.status === 429) {
+            openFocusRateLimitModal(
+              typeof errData.retryAfterSeconds === "number" ? errData.retryAfterSeconds : 20,
+              typeof errData.reason === "string" ? errData.reason : "cooldown"
+            );
+          }
           console.error("Focus API error:", res.status);
-          setFocusLoading(false);
           return;
         }
 
@@ -201,7 +243,7 @@ export default function PanoPage() {
       }
     };
     img.src = dataUrl;
-  }, [vf]);
+  }, [activeCamera, focusRateLimitModal.reason, openFocusRateLimitModal, vf]);
 
   useEffect(() => {
     if (!flash) return;
@@ -212,6 +254,12 @@ export default function PanoPage() {
   return (
     <div className="relative w-full min-h-screen bg-black">
       <PanoViewer gestureDeltaRef={gestureDeltaRef} captureRef={captureRef} />
+      <FocusRateLimitModal
+        open={focusRateLimitModal.open}
+        retryAfterSeconds={focusRateLimitModal.retryAfterSeconds}
+        reason={focusRateLimitModal.reason}
+        onClose={closeFocusRateLimitModal}
+      />
       {/* Big camera overlay — toggled by fist→open gesture */}
       <div
         className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center transition-all duration-500 ${

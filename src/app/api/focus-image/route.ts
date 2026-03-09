@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import {
+  checkFocusRateLimit,
+  extractClientIp,
+  getFocusRateLimitMessage,
+} from "@/lib/focusRateLimit";
 
 type CameraId = "sony-handycam" | "digital-camera" | "fujifilm-xt2" | "sony-a7iv";
 
@@ -67,6 +72,24 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "Missing image field" },
       { status: 400 }
+    );
+  }
+
+  const rateLimitResult = checkFocusRateLimit(Date.now(), extractClientIp(req.headers));
+  if (!rateLimitResult.allowed) {
+    const retryAfterSeconds = rateLimitResult.retryAfterSeconds;
+    return NextResponse.json(
+      {
+        error: getFocusRateLimitMessage(retryAfterSeconds, rateLimitResult.reason),
+        retryAfterSeconds,
+        reason: rateLimitResult.reason,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(retryAfterSeconds),
+        },
+      }
     );
   }
 

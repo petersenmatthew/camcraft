@@ -7,6 +7,7 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { NavButton } from "@/components/NavButton";
 import PhotoFlyAnimation from "@/components/PhotoFlyAnimation";
+import FocusRateLimitModal from "@/components/FocusRateLimitModal";
 import CityAutocomplete from "./CityAutocomplete";
 import HandOverlay from "@/app/pano/HandOverlay";
 import CameraViewfinderFrame, { VIEWFINDER_DIMENSIONS, MiniCameraFrame } from "@/components/CameraViewfinderFrame";
@@ -470,6 +471,11 @@ function GeneratePageContent() {
   const [cameraOverlayActive, setCameraOverlayActive] = useState(false);
   const [focusLoading, setFocusLoading] = useState(false);
   const [focusImage, setFocusImage] = useState<string | null>(null);
+  const [focusRateLimitModal, setFocusRateLimitModal] = useState<{
+    open: boolean;
+    retryAfterSeconds: number | null;
+    reason: string | null;
+  }>({ open: false, retryAfterSeconds: null, reason: null });
   const [badgeCount, setBadgeCount] = useState(0);
   const [badgePulse, setBadgePulse] = useState(false);
   const [flyAnimation, setFlyAnimation] = useState<{
@@ -477,6 +483,7 @@ function GeneratePageContent() {
     fromRect: DOMRect;
   } | null>(null);
   const focusBase64Ref = useRef<{ data: string; mimeType: string } | null>(null);
+  const focusCooldownUntilRef = useRef<number | null>(null);
 
   const focusImageRef = useRef<string | null>(null);
   focusImageRef.current = focusImage;
@@ -494,6 +501,22 @@ function GeneratePageContent() {
     setBadgeCount(getUnseenCount());
     setBadgePulse(true);
     setTimeout(() => setBadgePulse(false), 600);
+  }, []);
+
+  const openFocusRateLimitModal = useCallback(
+    (retryAfterSeconds: number, reason: string | null) => {
+      focusCooldownUntilRef.current = Date.now() + retryAfterSeconds * 1000;
+      setFocusRateLimitModal({
+        open: true,
+        retryAfterSeconds,
+        reason,
+      });
+    },
+    []
+  );
+
+  const closeFocusRateLimitModal = useCallback(() => {
+    setFocusRateLimitModal((prev) => ({ ...prev, open: false }));
   }, []);
 
   const onPictureFrame = useCallback(() => {
@@ -541,6 +564,19 @@ function GeneratePageContent() {
 
   const onFocus = useCallback(() => {
     if (focusLoadingRef.current) return; // don't re-trigger while loading
+
+    const cooldownUntil = focusCooldownUntilRef.current;
+    if (cooldownUntil && cooldownUntil > Date.now()) {
+      openFocusRateLimitModal(
+        Math.max(1, Math.ceil((cooldownUntil - Date.now()) / 1000)),
+        focusRateLimitModal.reason ?? "cooldown"
+      );
+      return;
+    }
+
+    if (cooldownUntil && cooldownUntil <= Date.now()) {
+      focusCooldownUntilRef.current = null;
+    }
 
     // Play focus sound
     try {
@@ -593,8 +629,14 @@ function GeneratePageContent() {
         });
 
         if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          if (res.status === 429) {
+            openFocusRateLimitModal(
+              typeof errData.retryAfterSeconds === "number" ? errData.retryAfterSeconds : 20,
+              typeof errData.reason === "string" ? errData.reason : "cooldown"
+            );
+          }
           console.error("Focus API error:", res.status);
-          setFocusLoading(false);
           return;
         }
 
@@ -610,7 +652,7 @@ function GeneratePageContent() {
       }
     };
     img.src = dataUrl;
-  }, [resolvedParams, vf]);
+  }, [activeCamera, focusRateLimitModal.reason, openFocusRateLimitModal, resolvedParams, vf]);
 
   useEffect(() => {
     if (!flash) return;
@@ -701,6 +743,12 @@ function GeneratePageContent() {
     return (
       <div className="relative w-full min-h-screen bg-black">
         <PanoViewer key={panoUrl} panoUrl={panoUrl} gestureDeltaRef={gestureDeltaRef} captureRef={captureRef} />
+        <FocusRateLimitModal
+          open={focusRateLimitModal.open}
+          retryAfterSeconds={focusRateLimitModal.retryAfterSeconds}
+          reason={focusRateLimitModal.reason}
+          onClose={closeFocusRateLimitModal}
+        />
 
         {/* Big camera overlay — toggled by fist→open gesture */}
         <div
